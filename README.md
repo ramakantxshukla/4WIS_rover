@@ -1,6 +1,6 @@
 # 4WIS Robot - ROS2 Jazzy + Gazebo Harmonic
 
-![Robot Demo](src/my_robot_bringup/gif/Pi7_Gif.gif)
+#![Robot Demo](src/my_robot_bringup/gif/Pi7_Gif.gif)
 
 A **4-Wheel Independent Steering (4WIS)** robot simulation with omnidirectional movement, SLAM, and autonomous navigation using ROS2 Jazzy and Gazebo Sim 8.
 
