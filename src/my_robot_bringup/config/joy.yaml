@@ -1,0 +1,13 @@
+teleop_twist_joy_node:
+  ros__parameters:
+    axis_linear:
+      x: 1        # Forward/backward (left stick vertical)
+      y: 0        # Sideways/strafe (left stick horizontal)
+    axis_angular:
+      yaw: 2      # Turn/rotate (right stick horizontal)
+    scale_linear:
+      x: 1.0      # Max forward/backward speed (m/s)
+      y: 1.0      # Max sideways speed (m/s)
+    scale_angular:
+      yaw: 2.0    # Max turning speed (rad/s)
+    enable_button: 6  # Enable button (hold to move)

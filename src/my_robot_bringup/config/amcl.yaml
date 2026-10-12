@@ -1,0 +1,88 @@
+map_server:
+  ros__parameters:
+    yaml_filename: "/home/ram2/my_map2.yaml"
+    use_sim_time: true
+
+amcl:
+  ros__parameters:
+    use_sim_time: true
+
+    # Motion model / odom noise tuning (increase for skid/poor odom)
+    alpha1: 0.1           # rotational noise from rotation
+    alpha2: 0.1           # rotational noise from translation
+    alpha3: 0.2           # translational noise from translation
+    alpha4: 0.2           # translational noise from rotation
+    alpha5: 0.00005
+
+    # Frame & topic names (ensure these match your TFs)
+    base_frame_id: "base_footprint"
+    odom_frame_id: "odom"
+    global_frame_id: "map"
+
+    scan_topic: "/scan"
+    odom_topic: "/odom"
+    map_topic: "/map"
+
+    # Beam skip (helpful when scans disagree with the map during rotation)
+    do_beamskip: true
+    beam_skip_distance: 0.5
+    beam_skip_error_threshold: 0.9
+    beam_skip_threshold: 0.15
+
+    # Laser model / ranges (fix invalid negative min range)
+    laser_model_type: "likelihood_field"
+    laser_max_range: 5.0
+    laser_min_range: 0.05         # <-- must be >= 0 (set to your lidar's min)
+    laser_likelihood_max_dist: 2.0
+    max_beams: 60
+    lambda_short: 0.1
+
+    # Particle filter params
+    max_particles: 4000           # raised from 5000 -> 4000 if CPU constrained; if you have CPU headroom use 4000-8000
+    min_particles: 800
+    pf_err: 0.01
+    pf_z: 0.99
+    resample_interval: 2
+
+    # KLD-sampling params
+    kld_err: 0.05
+    kld_z: 0.99
+
+    # Sensor model weights (you can tune these later)
+    z_hit: 0.6
+    z_short: 0.05
+    z_max: 0.05
+    z_rand: 0.3
+    sigma_hit: 0.15
+
+    # Recovery (set low if not used)
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
+
+    # Update thresholds (increase angular threshold to avoid spurious updates during rotation)
+    update_min_d: 0.15
+    update_min_a: 0.15     
+
+    # Pose & transform options
+    set_initial_pose: True
+    always_reset_initial_pose: False
+    first_map_only: True
+    initial_pose:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 3.14
+
+    tf_broadcast: true
+    transform_tolerance: 0.2
+    save_pose_rate: 10.0
+
+    robot_model_type: "nav2_amcl::DifferentialMotionModel"
+
+lifecycle_manager_localization:
+  ros__parameters:
+    use_sim_time: true
+    autostart: true
+    managed_nodes:
+      - map_server
+      - amcl

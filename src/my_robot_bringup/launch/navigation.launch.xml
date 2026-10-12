@@ -1,0 +1,37 @@
+<launch>
+    <let name="rviz_config_path"
+         value="$(find-pkg-share my_robot_bringup)/rviz/navigation.rviz"/>
+    <let name="nav_params_path"
+         value="$(find-pkg-share my_robot_bringup)/config/nav2_params.yaml"/>
+    <!-- <let name="slam_params_path"
+         value="$(find-pkg-share my_robot_bringup)/config/slam_toolbox_params.yaml"/> -->
+    <let name="localization_params_path"
+         value="$(find-pkg-share my_robot_bringup)/config/amcl.yaml"/>
+    <let name="map_file_path"
+         value="$(find-pkg-share my_robot_bringup)/worlds/my_map2.yaml"/>
+
+    <arg name="use_sim_time" default="true"/>
+    <!-- <arg name="slam" default="true" description="Use SLAM instead of AMCL with a saved map"/> -->
+    <arg name="rviz" default="true"/>
+
+    <!-- RViz -->
+    <node pkg="rviz2" exec="rviz2" if="$(var rviz)" output="screen"
+          args="-d $(var rviz_config_path)">
+        <param name="use_sim_time" value="$(var use_sim_time)"/>
+    </node>
+
+
+    <!-- Localization mode: AMCL on a saved map -->
+    <include file="$(find-pkg-share nav2_bringup)/launch/localization_launch.py">
+        <arg name="use_sim_time" value="$(var use_sim_time)"/>
+        <arg name="params_file" value="$(var localization_params_path)"/>
+        <arg name="map" value="$(var map_file_path)"/>
+    </include>
+
+    <!-- Nav2 navigation stack -->
+    <include file="$(find-pkg-share nav2_bringup)/launch/navigation_launch.py">
+        <arg name="use_sim_time" value="$(var use_sim_time)"/>
+        <arg name="params_file" value="$(var nav_params_path)"/>
+    </include>
+
+</launch>
