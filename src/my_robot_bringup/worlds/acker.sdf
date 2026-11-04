@@ -155,27 +155,27 @@
 
     <!-- ArUco Markers -->
     <include>
+      <uri>model://marker_3</uri>
+      <name>marker_3</name>
+      <pose>-9.70305 2.1481 1.7914 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://marker_2</uri>
+      <name>marker_2</name>
+      <pose>-0.7050 2.1481 1.7914 0 0 0</pose>
+    </include>
+
+    <include>
       <uri>model://marker_0</uri>
       <name>marker_0</name>
-      <pose>-9.6305 2.1481 1.7914 0 0 0</pose>
+      <pose>-9.5380 -2.0989 1.7914 0 0 0</pose>
     </include>
 
     <include>
       <uri>model://marker_1</uri>
       <name>marker_1</name>
-      <pose>-0.7050 2.1481 1.7914 1.57 0 3.14</pose>
-    </include>
-
-    <include>
-      <uri>model://marker_3</uri>
-      <name>marker_3</name>
-      <pose>-9.5380 -2.0989 1.7914 0 0 3.14</pose>
-    </include>
-
-    <include>
-      <uri>model://marker_4</uri>
-      <name>marker_4</name>
-      <pose>-0.7112 -2.1391 1.7914 -1.57 0 0</pose>
+      <pose>-0.7112 -2.1391 1.7914 0 0 3.14</pose>
     </include>
 
   </world>

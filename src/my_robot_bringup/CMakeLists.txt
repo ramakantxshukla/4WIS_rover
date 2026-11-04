@@ -21,9 +21,14 @@ install(
 
 install(PROGRAMS
   # scripts/imu_odom_fuser.py
-  # scripts/mobile_sensor_publisher.py
   scripts/vel_repub.py
   scripts/four_wheel_steering_controller.py
+  scripts/aruco_detector.py
+  scripts/marker_map_tf_broadcaster.py
+  scripts/aruco_amcl_localizer.py
+  scripts/aruco_map_odom_localizer.py
+  scripts/zed_aruco_localizer.py
+  scripts/zed_aruco_detector.py
   # scripts/interactive_waypoint_follower.py
   DESTINATION lib/${PROJECT_NAME}
 )

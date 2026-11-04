@@ -101,6 +101,6 @@ def generate_launch_description():
         spawn_wheel_velocity_controller,
         spawn_steering_position_controller,
         four_wheel_steering_node,
-        joy_node,
-        teleop_node,
+        # joy_node,
+        # teleop_node,
     ])

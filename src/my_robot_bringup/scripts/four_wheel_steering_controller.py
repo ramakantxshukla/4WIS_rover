@@ -2,7 +2,7 @@
 """
 Four Wheel Independent Steering (4WIS) Controller
 Converts Twist commands to individual wheel steering angles and velocities
-Also computes odometry from joint states
+Also computes odometry from joint states with Simple Moving Average filtering
 """
 
 import rclpy
@@ -14,6 +14,7 @@ from std_msgs.msg import Float64MultiArray
 from tf2_ros import TransformBroadcaster
 import math
 import numpy as np
+from collections import deque
 
 
 class FourWheelSteeringController(Node):
@@ -34,6 +35,15 @@ class FourWheelSteeringController(Node):
         # Joint state storage
         self.joint_positions = {}
         self.joint_velocities = {}
+        
+        # Simple Moving Average parameters
+        self.declare_parameter('sma_window_size', 5)
+        self.sma_window_size = self.get_parameter('sma_window_size').value
+        
+        # Velocity history buffers for SMA
+        self.vx_history = deque(maxlen=self.sma_window_size)
+        self.vy_history = deque(maxlen=self.sma_window_size)
+        self.omega_history = deque(maxlen=self.sma_window_size)
         
         # Subscribers
         self.twist_sub = self.create_subscription(
@@ -63,6 +73,24 @@ class FourWheelSteeringController(Node):
         
         self.get_logger().info('Four Wheel Steering Controller started')
         self.get_logger().info(f'Wheelbase: {self.wheelbase}m, Track width: {self.track_width}m')
+        self.get_logger().info(f'SMA window size: {self.sma_window_size} samples')
+
+    def apply_sma_filter(self, vx, vy, omega):
+        """
+        Apply Simple Moving Average (SMA) filter to velocity measurements
+        This helps smooth out encoder noise and improve odometry accuracy
+        """
+        # Add current values to history
+        self.vx_history.append(vx)
+        self.vy_history.append(vy)
+        self.omega_history.append(omega)
+        
+        # Calculate moving averages
+        vx_filtered = np.mean(self.vx_history)
+        vy_filtered = np.mean(self.vy_history)
+        omega_filtered = np.mean(self.omega_history)
+        
+        return vx_filtered, vy_filtered, omega_filtered
 
     def joint_state_callback(self, msg):
         """Store joint states for odometry calculation"""
@@ -145,7 +173,7 @@ class FourWheelSteeringController(Node):
         return vx, vy, omega
 
     def publish_odometry(self):
-        """Compute and publish odometry"""
+        """Compute and publish odometry with SMA filtering"""
         current_time = self.get_clock().now()
         
         # Initialize last_time on first call
@@ -158,10 +186,13 @@ class FourWheelSteeringController(Node):
         if dt <= 0:
             return
         
-        # Get velocity from wheel encoders
-        vx, vy, omega = self.compute_odometry_from_wheels()
+        # Get raw velocity from wheel encoders
+        vx_raw, vy_raw, omega_raw = self.compute_odometry_from_wheels()
         
-        # Update pose using velocity (dead reckoning)
+        # Apply Simple Moving Average filter to smooth out noise
+        vx, vy, omega = self.apply_sma_filter(vx_raw, vy_raw, omega_raw)
+        
+        # Update pose using filtered velocity (dead reckoning)
         # Transform velocity from robot frame to world frame
         delta_x = (vx * math.cos(self.theta) - vy * math.sin(self.theta)) * dt
         delta_y = (vx * math.sin(self.theta) + vy * math.cos(self.theta)) * dt
