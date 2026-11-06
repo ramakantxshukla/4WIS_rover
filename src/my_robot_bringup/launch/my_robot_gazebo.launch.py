@@ -89,7 +89,18 @@ def generate_launch_description():
         output='screen'
     )
     
+
+    spawn_controllers = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory("my_robot_bringup"),
+                "launch",
+                "spawn_controllers.launch.py",
+            )
+        )
+    )    
     return LaunchDescription([
+        spawn_controllers,
         set_gz_resource_path,
         robot_state_publisher,
         gz_sim,

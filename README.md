@@ -58,7 +58,14 @@ source install/setup.bash
 
 ## Launch Instructions
 
-### Terminal 1 — Launch Gazebo + Robot
+### LAUNCH ENTIRE ROBOT WITH NAV2
+```bash
+ros2 launch my_robot_bringup my_robot_bringup.launch.py
+```
+
+
+
+### OR Terminal 1 — Launch Gazebo + Robot
 
 **Use Python launch (recommended):**
 ```bash

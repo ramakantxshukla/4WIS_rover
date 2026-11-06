@@ -9,7 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY launch config worlds rviz utils
+  DIRECTORY launch config worlds rviz utils maps
   DESTINATION share/${PROJECT_NAME}/
 )
 
@@ -29,6 +29,7 @@ install(PROGRAMS
   scripts/aruco_map_odom_localizer.py
   scripts/zed_aruco_localizer.py
   scripts/zed_aruco_detector.py
+  scripts/nav2_relay.py
   # scripts/interactive_waypoint_follower.py
   DESTINATION lib/${PROJECT_NAME}
 )

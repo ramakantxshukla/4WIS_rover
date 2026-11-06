@@ -48,8 +48,6 @@ class FourWheelSteeringController(Node):
         # Subscribers
         self.twist_sub = self.create_subscription(
             Twist, '/cmd_vel', self.twist_callback, 10)
-        self.twist_stamped_sub = self.create_subscription(
-            TwistStamped, '/cmd_vel_stamped', self.twist_stamped_callback, 10)
         self.joint_state_sub = self.create_subscription(
             JointState, '/joint_states', self.joint_state_callback, 10)
         
@@ -257,9 +255,6 @@ class FourWheelSteeringController(Node):
         
         self.last_time = current_time
 
-    def twist_stamped_callback(self, msg):
-        """Handle TwistStamped messages"""
-        self.process_twist(msg.twist)
 
     def twist_callback(self, msg):
         """Handle Twist messages"""

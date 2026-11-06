@@ -41,112 +41,69 @@ behavior_server:
     behavior_plugins: ["spin", "backup", "drive_on_heading", "wait"]
 
     spin:
-      plugin: "nav2_behaviors/Spin"
+      plugin: "nav2_behaviors::Spin"
 
     backup:
-      plugin: "nav2_behaviors/BackUp"
+      plugin: "nav2_behaviors::BackUp"
 
       # Maximum acceleration limit (m/s^2). This parameter limits the rate at which speed increases when moving backward.
-      acceleration_limit: 1.0
+      acceleration_limit: 1.5
 
       # Maximum deceleration limit (m/s^2). Negative value. This parameter limits the rate at which speed decreases when moving backward.
-      deceleration_limit: -1.0
+      deceleration_limit: -1.5
 
       # Minimum speed to move, the DEADBAND velocity of the robot behavior (m/s). Positive value.
       minimum_speed: 0.01
 
     drive_on_heading:
-      plugin: "nav2_behaviors/DriveOnHeading"
+      plugin: "nav2_behaviors::DriveOnHeading"
 
       # Maximum acceleration limit (m/s^2). This parameter limits the rate at which speed increases when moving backward.
-      acceleration_limit: 1.0
+      acceleration_limit: 2.0
 
       # Maximum deceleration limit (m/s^2). Negative value. This parameter limits the rate at which speed decreases when moving backward.
-      deceleration_limit: -1.0
+      deceleration_limit: -2.0
 
       # Minimum speed to move, the DEADBAND velocity of the robot behavior (m/s). Positive value.
-      minimum_speed: 0.05
+      minimum_speed: 0.1
 
     wait:
-      plugin: "nav2_behaviors/Wait"
+      plugin: "nav2_behaviors::Wait"
       
     # Time to look ahead for collisions (s).
     simulate_ahead_time: 3.0
 
     # Maximum rotational velocity (rad/s).
-    max_rotational_vel: 2.0
+    max_rotational_vel: 1.5
 
     # Minimum rotational velocity (rad/s).
-    min_rotational_vel: 0.1
+    min_rotational_vel: 0.7
 
     # Maximum rotational acceleration (rad/s^2)
     rotational_acc_lim: 2.0
 
     # Whether to use geometry_msgs::msg::Twist or geometry_msgs::msg::TwistStamped velocity data. 
     # True uses TwistStamped, false uses Twist.
-    enable_stamped_cmd_vel: false
+    enable_stamped_cmd_vel: false # Do update for Hardware
+
+bt_navigator:
   ros__parameters:
-    use_sim_time: true
     global_frame: map
     robot_base_frame: base_footprint
     odom_topic: /odom
 
-    # REQUIRED
-    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
+    # REQUIRED — custom BT with 0.5 Hz (every 2s) global replanning
+    default_bt_xml_filename: "navigate_w_replanning.xml"
 
-    plugin_lib_names:
-    # Core navigation actions
-    - nav2_compute_path_to_pose_action_bt_node
-    - nav2_compute_path_through_poses_action_bt_node
-    - nav2_follow_path_action_bt_node
-    - nav2_smooth_path_action_bt_node
-    - nav2_navigate_to_pose_action_bt_node
-    - nav2_navigate_through_poses_action_bt_node
+    # Path to custom BT XMLs
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    navigators: ["navigate_to_pose", "navigate_through_poses"]
+    navigate_to_pose:
+      plugin: "nav2_bt_navigator::NavigateToPoseNavigator"
+    navigate_through_poses:
+      plugin: "nav2_bt_navigator::NavigateThroughPosesNavigator"
 
-    # Motion primitives
-    - nav2_spin_action_bt_node
-    - nav2_wait_action_bt_node
-    - nav2_back_up_action_bt_node
-    - nav2_drive_on_heading_bt_node
-
-    # Recovery & control flow
-    - nav2_recovery_node_bt_node
-    - nav2_pipeline_sequence_bt_node
-    - nav2_round_robin_node_bt_node
-    - nav2_rate_controller_bt_node
-    - nav2_distance_controller_bt_node
-    - nav2_speed_controller_bt_node
-    - nav2_single_trigger_bt_node
-
-    # Costmap & localization
-    - nav2_clear_costmap_service_bt_node
-    - nav2_reinitialize_global_localization_service_bt_node
-
-    # Goal & path conditions
-    - nav2_goal_reached_condition_bt_node
-    - nav2_goal_updated_condition_bt_node
-    - nav2_globally_updated_goal_condition_bt_node
-    - nav2_is_path_valid_condition_bt_node
-    - nav2_is_stuck_condition_bt_node
-    - nav2_initial_pose_received_condition_bt_node
-    - nav2_transform_available_condition_bt_node
-    - nav2_time_expired_condition_bt_node
-    - nav2_distance_traveled_condition_bt_node
-
-    # Planner / controller / goal checker selection
-    - nav2_planner_selector_bt_node
-    - nav2_controller_selector_bt_node
-    - nav2_goal_checker_selector_bt_node
-
-    # Cancel nodes (Humble-supported)
-    - nav2_controller_cancel_bt_node
-    - nav2_wait_cancel_bt_node
-    - nav2_spin_cancel_bt_node
-    - nav2_back_up_cancel_bt_node
-    - nav2_drive_on_heading_cancel_bt_node
-
-    # Utility
-    - nav2_remove_passed_goals_action_bt_node
 
 
 controller_server:
@@ -180,7 +137,7 @@ controller_server:
     # Do read the effects of its change in values
     odom_duration: 0.3
 
-    enable_stamped_cmd_vel: false
+    enable_stamped_cmd_vel: false # Do update for Hardware
 
     bond_heartbeat_period: 0.4
 
@@ -218,88 +175,70 @@ controller_server:
       stateful: true
 
     FollowPath:
-      plugin: "nav2_mppi_controller::MPPIController"
-      time_steps: 56
-      model_dt: 0.05
-      batch_size: 2000
-      ax_max: 2.0
-      ax_min: -2.0
-      ay_max: 0.0
-      az_max: 2.0
-      vx_std: 0.2
-      vy_std: 0.0
-      wz_std: 0.4
-      vx_max: 0.5
-      vx_min: 0.0
-      vy_max: 0.0
-      wz_max: 1.0
-      iteration_count: 1
-      prune_distance: 1.7
-      transform_tolerance: 0.2
-      temperature: 0.3
-      gamma: 0.015
-      motion_model: "Ackermann"
-      visualize: true
-      regenerate_noises: true
-      TrajectoryVisualizer:
-        trajectory_step: 5
-        time_step: 3
-      AckermannConstraints:
-        min_turning_r: 0.45
-      critics: ["ConstraintCritic", "CostCritic", "GoalCritic",
-                "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic",
-                "PathAngleCritic", "PreferForwardCritic"]
-      ConstraintCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 4.0
-      GoalCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 5.0
-        threshold_to_consider: 1.4
-      GoalAngleCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 3.0
-        threshold_to_consider: 0.5
-      PreferForwardCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 5.0
-        threshold_to_consider: 0.5
-      CostCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 3.81
-        critical_cost: 300.0
-        consider_footprint: true
-        collision_cost: 1000000.0
-        near_goal_distance: 1.0
-        trajectory_point_step: 2
-      PathAlignCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 14.0
-        max_path_occupancy_ratio: 0.05
-        trajectory_point_step: 4
-        threshold_to_consider: 0.5
-        offset_from_furthest: 20
-        use_path_orientations: false
-      PathFollowCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 5.0
-        offset_from_furthest: 5
-        threshold_to_consider: 1.4
-      PathAngleCritic:
-        enabled: true
-        cost_power: 1
-        cost_weight: 2.0
-        offset_from_furthest: 4
-        threshold_to_consider: 0.5
-        max_angle_to_furthest: 1.0
-        mode: 0
+      plugin: "dwb_core::DWBLocalPlanner"
+      debug_trajectory_details: true
+
+      # Velocity limits (diff-drive)
+      min_vel_x: 0.0
+      min_vel_y: 0.0
+      max_vel_x: 0.375
+      max_vel_y: 0.0
+      max_vel_theta: 2.0
+
+      min_speed_xy: 0.0
+      max_speed_xy: 0.3825
+      min_speed_theta: 0.0
+
+      # Acceleration limits
+      acc_lim_x: 1.5
+      acc_lim_y: 0.0
+      acc_lim_theta: 1.5
+      decel_lim_x: -1.5
+      decel_lim_y: 0.0
+      decel_lim_theta: -2.0
+
+      # Sampling
+      vx_samples: 20
+      vy_samples: 5
+      vtheta_samples: 20
+
+      sim_time: 1.7
+      linear_granularity: 0.05
+      angular_granularity: 0.025
+
+      # Stopping & evaluation
+      trans_stopped_velocity: 0.05
+
+      path_length_tolerance: 1.0
+
+      short_circuit_trajectory_evaluation: true
+
+      limit_vel_cmd_in_traj: false
+
+      stateful: true
+
+      critics:
+        - RotateToGoal
+        - Oscillation
+        - BaseObstacle
+        - GoalAlign
+        - PathAlign
+        - PathDist
+        - GoalDist
+
+      # PathAlign ≈ PathDist > GoalAlign ≈ GoalDist < RotateToGoal #FRY
+      BaseObstacle.scale: 20.0 # 16.0
+      PathAlign.scale: 32.0 # 32
+      GoalAlign.scale: 20.0 # 20
+      PathDist.scale: 31.0 # 32
+      GoalDist.scale: 20.0 # 20
+
+      PathAlign.forward_point_distance: 0.1
+      GoalAlign.forward_point_distance: 0.075
+
+      RotateToGoal.scale: 28.0
+      RotateToGoal.slowing_factor: 5.0
+      RotateToGoal.lookahead_time: 0.5
       
 
 global_costmap:
@@ -312,10 +251,11 @@ global_costmap:
       # Robot base frame.
       robot_base_frame: base_footprint
 
-      update_frequency: 5.0
+      # Increased to detect dynamic obstacles faster
+      update_frequency: 10.0
 
       # Frequency to publish costmap to topic.
-      publish_frequency: 2.0
+      publish_frequency: 5.0
 
       # Resolution of 1 pixel of the costmap, in meters.
       resolution: 0.05
@@ -324,73 +264,46 @@ global_costmap:
       # robot_radius: 0.22
 
       # Amount to pad footprint (m).
-      footprint_padding: 0.1
+      footprint_padding: 0.05
 
       # Ordered set of footprint points passed in as a string, must be closed set.
-      footprint: "[[0.05, 0.3], [0.05, -0.3], [-0.65, -0.3], [-0.65, 0.3]]"
+      footprint: "[[0.185, 0.185], [0.185, -0.185], [-0.185, -0.185], [-0.185, 0.185]]"
       #"[[0.25, 0.5], [0.25, -0.5], [-0.85, -0.5], [-0.85, 0.5]]"
 
       # Minimum cost of an occupancy grid map to be considered a lethal obstacle.
-      lethal_cost_threshold: 254
+      lethal_cost_threshold: 253
 
       # The height of map, allows to avoid rviz visualization flickering at -0.008
       map_vis_z: 0.0
 
-      plugins: ["obstacle_layer","static_layer", "inflation_layer"]
+      # Layer order matters: inflation applies to all layers above it.
+      # static_inflation inflates only static map walls (large radius).
+      # voxel_layer adds live sensor obstacles on top.
+      # dynamic_inflation inflates only dynamic obstacles (small radius).
+      plugins: ["static_layer", "static_inflation", "voxel_layer", "dynamic_inflation"]
 
-      obstacle_layer:
-        plugin: "nav2_costmap_2d::ObstacleLayer"
-
-        # Whether it is enabled.
+      voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: true
-
-        # Clear any occupied cells under robot footprint.
-        footprint_clearing_enabled: true
-
-        # Minimum height to add return to occupancy grid.
-        min_obstacle_height: 0.0
-
-        # Maximum height to add return to occupancy grid.
+        publish_voxel_map: false
+        origin_z: 0.0
+        z_resolution: 0.05
+        z_voxels: 16
         max_obstacle_height: 2.0
-
-        tf_filter_tolerance: 0.5
-
-        # namespace of sources of data.
-        observation_sources: "scan"
-
+        mark_threshold: 0
+        combination_method: 1
+        observation_sources: scan
         scan:
-          # The ROS topic from which LaserScan messages are read.
           topic: /scan
-
-          # Specifies message type.
-          data_type: "LaserScan"
-
-          # When a laser hit is detected
-          marking: true
-
-          # Clear free space along the ray path
+          max_obstacle_height: 2.0
           clearing: true
-
-          # Usually both marking + clearing should be true.
-
-          # Only laser hits within 2.5 m are treated as obstacles.
-          obstacle_max_range: 2.5
-
-          # Ignore readings closer than this.
-          obstacle_min_range: 0.2
-
-          # Maximum distance for clearing free space.
-          raytrace_max_range: 3.0
-
-          # Start clearing from this distance.
+          marking: true
+          data_type: "LaserScan"
+          raytrace_max_range: 3.5
           raytrace_min_range: 0.0
-
-          # If LiDAR reports ∞ (no hit):
-          # false → ignore
-          # true → treat as free space until max range
-          inf_is_valid: false
-
-
+          obstacle_max_range: 3.0
+          obstacle_min_range: 0.2
+          observation_persistence: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
 
@@ -415,22 +328,24 @@ global_costmap:
         map_topic: /map
 
 
-      inflation_layer:
+      static_inflation:
         plugin: "nav2_costmap_2d::InflationLayer"
-
-        # Whether it is enabled.
         enabled: true
+        # Large radius for permanent walls — planner routes well clear of them.
+        inflation_radius: 1.7
+        cost_scaling_factor: 3.5
+        inflate_unknown: false
+        inflate_around_unknown: true
 
-        # Radius to inflate costmap around lethal obstacles.
-        inflation_radius: 1.0 #1.0 #FRY
-
-        # Exponential decay factor across inflation radius.
-        cost_scaling_factor: 2.0 #FRY
-
-        # Indoor Nav2 robots → NEVER inflate unknown space
-        inflate_unknown: false # Unknown allowed
-
-        inflate_around_unknown: true # But approached cautiously  
+      dynamic_inflation:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        enabled: true
+        # Small radius for live sensor obstacles — planner avoids them but
+        # doesn't treat them as severely as static walls.
+        inflation_radius: 0.4
+        cost_scaling_factor: 4.0
+        inflate_unknown: false
+        inflate_around_unknown: false
 
       # Whether to send full costmap every update, rather than updates.
       always_send_full_costmap: true
@@ -457,7 +372,7 @@ local_costmap:
       height: 5
       resolution: 0.05
 
-      footprint: "[[0.05, 0.3], [0.05, -0.3], [-0.65, -0.3], [-0.65, 0.3]]"
+      footprint: "[[0.185, 0.185], [0.185, -0.185], [-0.185, -0.185], [-0.185, 0.185]]"
       #"[[0.25, 0.5], [0.25, -0.5], [-0.85, -0.5], [-0.85, 0.5]]"
       footprint_padding: 0.1
       # robot_radius: 0.22
@@ -480,9 +395,9 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 3.0
+          raytrace_max_range: 5.0   # increased from 3.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 2.5
+          obstacle_max_range: 4.5   # increased from 2.5
           obstacle_min_range: 0.0
 
       obstacle_layer:
@@ -518,23 +433,18 @@ local_costmap:
           # Clear free space along the ray path
           clearing: true
 
-          # Usually both marking + clearing should be true.
-
-          # Only laser hits within 2.5 m are treated as obstacles.
-          obstacle_max_range: 2.5
+          # Only laser hits within this range are treated as obstacles.
+          obstacle_max_range: 4.5   # increased from 2.5
 
           # Ignore readings closer than this.
           obstacle_min_range: 0.2
 
           # Maximum distance for clearing free space.
-          raytrace_max_range: 3.0
+          raytrace_max_range: 5.0   # increased from 3.0
 
           # Start clearing from this distance.
           raytrace_min_range: 0.0
 
-          # If LiDAR reports ∞ (no hit):
-          # false → ignore
-          # true → treat as free space until max range
           inf_is_valid: false
 
       inflation_layer:
@@ -542,8 +452,8 @@ local_costmap:
         enabled: true
 
         # Distance (in meters) around obstacles that get inflated.
-        inflation_radius: 1.5 # 0.35 #FRY
-        cost_scaling_factor: 2.0 # 3.0 #FRY
+        inflation_radius: 0.495 #FRY
+        cost_scaling_factor: 2.0 #FRY
 
         inflate_unknown: false 
 
@@ -597,65 +507,62 @@ planner_server:
     planner_plugins: ["GridBased"]
 
     GridBased:
-      plugin: "nav2_smac_planner::SmacPlannerHybrid"
-
+      plugin: "nav2_smac_planner::SmacPlanner2D"
+      
       # Tolerance in meters between requested goal pose and end of path.
       tolerance: 0.5
 
-      # Downsample costmap for faster planning
+      # Whether to downsample costmap to another resolution for search.
       downsample_costmap: false
+
+      # Multiplier factor to downsample costmap by (e.g. if 5cm costmap at 2 downsample_factor, 10cm output).
       downsampling_factor: 1
 
+      # Whether to allow traversing/search in unknown space.
       allow_unknown: false
 
-      # Use A* (true) or ARA* (false)
-      use_astar: false
+      use_astar: true
 
+      # Maximum number of search iterations before failing to limit compute time, disabled by -1.
       max_iterations: 1000000
+
+      # Maximum number of iterations after the search is within tolerance before returning approximate path 
+      # with best heuristic if exact path is not found.
       max_on_approach_iterations: 1000
+
+      # Number of iterations between checking if the goal has been cancelled or planner timed out
       terminal_checking_interval: 5000
-      max_planning_time: 5.0
 
-      cost_travel_multiplier: 2.0
+      # Maximum planning time in seconds.
+      max_planning_time: 0.5
 
-      # Angle quantization bins for heading
-      angle_quantization_bins: 72
+      # Cost multiplier to apply to search to steer away from high cost areas.  
+      cost_travel_multiplier: 20.0
 
-      # Minimum turning radius in meters - match your robot
-      minimum_turning_radius: 0.45
+      # If true, the last pose of the path generated by the planner will have its orientation set to the approach orientation, 
+      # i.e. the orientation of the vector connecting the last two points of the path
+      use_final_approach_orientation: false
 
-      # Reverse driving enabled
-      allow_reverse_expansion: false
-
-      # Penalty for reversing
-      reverse_penalty: 2.1
-
-      # Penalty for changing direction
-      change_penalty: 0.1
-
-      # Penalty for non-straight paths
-      non_straight_penalty: 1.05
-
-      # Penalty for cost
-      cost_penalty: 2.0
-
-      # Retrospective penalty
-      retrospective_penalty: 0.015
-
-      # Lookup table size for heuristic
-      lookup_table_size: 20.0
-
-      # Cache obstacle heuristic
-      cache_obstacle_heuristic: false
 
       smoother:
+        # The maximum number of iterations the smoother has to smooth the path, to bound potential computation.
         max_iterations: 1000
+
+        # Weight for smoother to apply to smooth out the data points
         w_smooth: 0.3
+
+        # Weight for smoother to apply to retain original data information
         w_data: 0.2
+
+        # Parameter tolerance change amount to terminate smoothing session
         tolerance: 1.0e-10
+
+        # Performs extra refinement smoothing runs. 
+        # Essentially, this recursively calls the smoother using the output from the last smoothing cycle to further smooth the path for macro-trends.
         do_refinement: true
+
+        # Number of times to recursively attempt to smooth, must be >= 1.
         refinement_num: 2
-        enforce_path_inversion: true
 
     bond_heartbeat_period: 0.4
 
@@ -691,18 +598,18 @@ velocity_smoother:
   ros__parameters:
     smoothing_frequency: 10.0 #0.01
     scale_velocities: false
-    feedback: "CLOSED_LOOP" # OPEN_LOOP
-    max_velocity: [2.0, 0.0, 2.0]
-    min_velocity: [-2.0, 0.0, -2.0]
+    feedback: "OPEN_LOOP" # OPEN_LOOP
+    max_velocity: [0.375, 0.0, 2.0]
+    min_velocity: [-0.375, 0.0, -2.0]
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
 
     # MOST TUNED PART
-    max_accel: [2.5, 0.0, 3.2]
-    max_decel: [-2.5, 0.0, -3.2]
+    max_accel: [1.5, 0.0, 2.0]
+    max_decel: [-1.5, 0.0, -2.0]
 
 
-    odom_topic: "odom"
+    odom_topic: "/odom"
     odom_duration: 0.1
 
     # Runs smoother thread with real-time priority.
@@ -710,7 +617,7 @@ velocity_smoother:
     use_realtime_priority: false
 
     # If true, uses TwistStamped.
-    enable_stamped_cmd_vel: false
+    enable_stamped_cmd_vel: false # Do update for Hardware
 
     bond_heartbeat_period: 0.4
 
@@ -742,13 +649,10 @@ waypoint_follower:
 
       allow_parameter_qos_overrides: true
 
-
 collision_monitor:
   ros__parameters:
     base_frame_id: "base_footprint"
     odom_frame_id: "odom"
-    cmd_vel_in_topic: "cmd_vel_smoothed"
-    cmd_vel_out_topic: "cmd_vel"
     state_topic: "collision_monitor_state"
     transform_tolerance: 0.2
     source_timeout: 1.0
@@ -804,4 +708,4 @@ docking_server:
       k_phi: 3.0
       k_delta: 2.0
       v_linear_min: 0.15
-      v_linear_max: 0.15
+      v_linear_max: 0.15      
