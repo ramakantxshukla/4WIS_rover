@@ -30,7 +30,7 @@ sudo apt install ros-jazzy-teleop-twist-joy ros-jazzy-teleop-twist-keyboard
 
 **Terminal 1:**
 ```bash
-cd ~/ackermann_steering_robot-master
+cd ~/4WIS_rover
 colcon build --symlink-install
 source install/setup.bash
 ros2 launch my_robot_bringup my_robot_gazebo.launch.py
@@ -51,7 +51,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 ### Build and Source
 ```bash
-cd ~/ackermann_steering_robot-master
+cd ~/4WIS_rover
 colcon build --symlink-install
 source install/setup.bash
 ```

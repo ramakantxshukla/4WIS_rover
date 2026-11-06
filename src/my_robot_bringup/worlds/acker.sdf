@@ -112,7 +112,7 @@
         <collision name='collision'>
           <geometry>
             <mesh>
-              <uri>file:///home/ram2/ackermann_steering_robot-master/src/my_robot_description/meshes/Arena.obj</uri>
+              <uri>model://Arena.obj</uri>
               <scale>0.01 0.01 0.01</scale>
             </mesh>
           </geometry>
@@ -120,7 +120,7 @@
         <visual name='visual'>
           <geometry>
             <mesh>
-              <uri>file:///home/ram2/ackermann_steering_robot-master/src/my_robot_description/meshes/Arena.obj</uri>
+              <uri>model://Arena.obj</uri>
               <scale>0.01 0.01 0.01</scale>
             </mesh>
           </geometry>
